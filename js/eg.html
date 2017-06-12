@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>eg</title>
+</head>
+<body>
+	<input type="text" data-bind="value:searchWord,valueUpdate: 'afterkeydown',event: { keyup:search }">
+	<script src='libs/knockoutjs-3.4.2.js'></script>
+	<script>
+	var viewModel = {
+		searchWord : ko.observable("222"),
+		search : function(){
+			if(this.searchWord() !== ''){
+				if('ssssss'.indexOf(this.searchWord())!= -1){
+					this.searchWord(111);
+				}else{
+					this.searchWord(333);
+				}
+			}
+		}
+	}
+
+	ko.applyBindings(viewModel);
+	</script>
+</body>
+</html>
