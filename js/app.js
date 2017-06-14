@@ -1,13 +1,13 @@
 
 //数据
 var universities = [
-          {name: '中国地质大学（武汉）', location: [114.398904,30.520774],id: '武汉'},
-          {name: '华中科技大学', location: [114.414725,30.515978],id: '北京'},
-          {name: '武汉大学', location: [114.365248,30.53786],id: '南京'},
-          {name: '武汉理工大学', location: [114.353978,30.518672],id: '广州'},
-          {name: '中南财经政法大学', location: [114.381502,30.473399],id: '西安'},
-          {name: '华中农业大学', location:[114.35673,30.475421],id: '长沙'},
-          {name: '中南民族大学', location:[114.39316,30.48668],id: '成都'},
+          {name: '中国地质大学（武汉）', location: [114.398904,30.520774]},
+          {name: '华中科技大学', location: [114.414725,30.515978]},
+          {name: '武汉大学', location: [114.365248,30.53786]},
+          {name: '武汉理工大学', location: [114.347353,30.521553]},
+          {name: '中南财经政法大学', location: [114.381502,30.473399]},
+          {name: '华中农业大学', location:[114.35673,30.475421]},
+          {name: '中南民族大学', location:[114.39316,30.48668]},
         ];
   
 
@@ -23,6 +23,7 @@ function init(){
 
   ko.applyBindings(new MapViewModel(universities));
 
+
 }
 
 //为每个学校的属性创建观察变量
@@ -35,7 +36,7 @@ var University = function(university){
     //绑定li是否可见
     this.visible = ko.observable(true);
     //ajax查询
-    this.id= ko.observable(university.id);
+    // this.id= ko.observable(university.id);
     
 }
 
@@ -57,7 +58,7 @@ var MapViewModel = function(data){
 
     var marker;
 
-    self.universityList().forEach(function(university){
+    self.universityList().forEach(function(university,index){
 
     //用已有图片替换marker默认的icon
     var icon = new AMap.Icon({
@@ -71,62 +72,50 @@ var MapViewModel = function(data){
           map: map,
           animation:'AMAP_ANIMATION_DROP',
     });
-        
-    //
+
     university.marker = marker;
 
-    $.ajax({
-      url:"http://v.juhe.cn/weather/index?format=2&cityname="+university.id()+"&dtype=&format=&key=630a5114bc1d2bf4729275b4f07d532a",
 
-      dataType: "jsonp",
+    AMap.event.addListener(university.marker,'click',function(){
+      
+      var src="http://api.map.baidu.com/panorama/v2?ak=I8yKhCGTcuIEU9fBlwppGcXUA9klckhF&width=256&height=128&coordtype=wgs84ll&location="+university.location()+"&fov=180";
+      var info=[];
+      info.push("<h2>"+university.name()+"</h2>");
+      info.push("<div><img src="+src+" alt='无法获取图片'>");
 
+      infowindow.setContent(info.join("<br>"));
+      infowindow.open(map,this.getPosition());
 
+      university.marker.setAnimation('AMAP_ANIMATION_BOUNCE');
+      setTimeout(function () {
+            university.marker.setAnimation(null);
+      }, 1200);
 
-      success: function(responce){
-        var result = responce.result.today;
-
-        
-        var info=[];
-        info.push("<p>地点："+university.id()+"</p>");
-        info.push("<p>温度："+result.temperature+"</p>");
-        info.push("<p>天气："+result.weather+"</p>");
-        marker.content=info.join('<br>');
-        
-
-        AMap.event.addListener(university.marker,'click',function(){
-          infowindow.setContent(marker.content);
-          infowindow.open(map,this.getPosition());
-
-          university.marker.setAnimation('AMAP_ANIMATION_BOUNCE');
-          setTimeout(function () {
-                university.marker.setAnimation(null);
-          }, 1200);
-
-          map.setCenter(university.marker.getPosition());
-        });
-      },
-
-      error: function (e) {
-             return alert('加载失败');   
-          },
+      map.setCenter(university.marker.getPosition());
     });
+     
+
 
 
   });
     
-    
-
+  //显示所点击的list对应的infowindow
   self.showInfo = function(university){
     AMap.event.trigger(university.marker,'click');
      
   };
+
+  self.isShow= ko.observable(50);
+  self.toggleList=function(){
+    return self.isShow(-self.isShow());
+  }
 
   self.userInput = ko.observable('');
 
   //搜索函数
   self.filterMarkers = function () {
       
-      var searchInput = self.userInput().toLowerCase();
+      var searchInput = self.userInput();
         
       self.universityList().forEach(function (university) {
           university.visible(true);
@@ -139,6 +128,23 @@ var MapViewModel = function(data){
       });
        
   };
+  // self.filteredMarkers=ko.computed(function(){
+  //   if(!self.userInput()){
+  //     return self.universityList();
+  //     console.log(self.userInput(66));
+  //   }else{
+  //     return self.universityList().forEach(function(university){
+  //       university.visible(true);
+  //       university.marker.setMap(map);
+  //       console.log(self.userInput());
+
+  //       if (university.name().indexOf(self.searchInput) === -1) {
+  //           university.visible(false);
+  //           university.marker.setMap(null);
+  //       }
+  //     });
+  //   }
+  // },this);
 };
 
 
