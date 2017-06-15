@@ -74,25 +74,54 @@ var MapViewModel = function(data){
     });
 
     university.marker = marker;
+    
 
-
-    AMap.event.addListener(university.marker,'click',function(){
+    
       
-      var src="http://api.map.baidu.com/panorama/v2?ak=I8yKhCGTcuIEU9fBlwppGcXUA9klckhF&width=256&height=128&coordtype=wgs84ll&location="+university.location()+"&fov=180";
-      var info=[];
-      info.push("<h2>"+university.name()+"</h2>");
-      info.push("<div><img src="+src+" alt='无法获取图片'>");
 
-      infowindow.setContent(info.join("<br>"));
-      infowindow.open(map,this.getPosition());
 
-      university.marker.setAnimation('AMAP_ANIMATION_BOUNCE');
-      setTimeout(function () {
-            university.marker.setAnimation(null);
-      }, 1200);
 
-      map.setCenter(university.marker.getPosition());
-    });
+      $.ajax({
+        url:"http://v.juhe.cn/weather/index?cityname=武汉&dtype=&format=&key=630a5114bc1d2bf4729275b4f07d532a",
+
+        dataType:"jsonp",
+
+        success: function(responce){
+          var data=responce.result.today;
+          var info=[];
+          info.push("<h2>"+university.name()+"</h2>");
+          info.push("<p>温度："+data.temperature+"</p>");
+          info.push("<p>天气："+data.weather+"</p>");
+          
+          
+          AMap.event.addListener(university.marker,'click',function(){
+
+            var src="http://api.map.baidu.com/panorama/v2?ak=I8yKhCGTcuIEU9fBlwppGcXUA9klckhF&width=256&height=128&coordtype=wgs84ll&location="+university.location()+"&fov=180";
+            
+            
+
+            info.push("<div><img src="+src+" alt='无法获取图片'>");
+            infowindow.setContent(info.join("<br>"));
+            infowindow.open(map,this.getPosition());
+
+            university.marker.setAnimation('AMAP_ANIMATION_BOUNCE');
+            setTimeout(function () {
+                  university.marker.setAnimation(null);
+            }, 1200);
+
+            map.setCenter(university.marker.getPosition());
+          });
+
+        },
+
+        error: function(e){
+          alert("无法获取信息！");
+        },
+      });
+      
+      
+
+      
      
 
 
@@ -112,39 +141,38 @@ var MapViewModel = function(data){
 
   self.userInput = ko.observable('');
 
+  //存储搜索对应的标记
+  self.show = ko.observableArray();
+  
+  
+  //监测输入框中内容
+  self.userInput = ko.observable('');
+
   //搜索函数
   self.filterMarkers = function () {
       
       var searchInput = self.userInput();
+      self.show.removeAll();
         
       self.universityList().forEach(function (university) {
-          university.visible(true);
-          university.marker.setMap(map);
+          
+            university.marker.hide();
+            university.visible(false);
             
-          if (university.name().toLowerCase().indexOf(searchInput) === -1) {
-              university.visible(false);
-              university.marker.setMap(null);
-          }
+              
+            if (university.name().indexOf(searchInput) !== -1) {
+                self.show.push(university);
+                university.visible(true);
+                
+            }
+          
+      });
+      self.show().forEach(function(university){
+        university.marker.show();
       });
        
   };
-  // self.filteredMarkers=ko.computed(function(){
-  //   if(!self.userInput()){
-  //     return self.universityList();
-  //     console.log(self.userInput(66));
-  //   }else{
-  //     return self.universityList().forEach(function(university){
-  //       university.visible(true);
-  //       university.marker.setMap(map);
-  //       console.log(self.userInput());
-
-  //       if (university.name().indexOf(self.searchInput) === -1) {
-  //           university.visible(false);
-  //           university.marker.setMap(null);
-  //       }
-  //     });
-  //   }
-  // },this);
+  
 };
 
 
