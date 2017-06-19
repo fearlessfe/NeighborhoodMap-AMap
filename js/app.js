@@ -78,24 +78,29 @@ var MapViewModel = function(data){
 
     
       
-
+    let i=index;
 
 
       $.ajax({
-        url:"http://v.juhe.cn/weather/index?cityname=武汉&dtype=&format=&key=630a5114bc1d2bf4729275b4f07d532a",
+        // url:"http://v.juhe.cn/weather/index?cityname=武汉&dtype=&format=&key=630a5114bc1d2bf4729275b4f07d532a",
+        // url:"http://v.juhe.cn/toutiao/index?type=keji&key=793bdd1e7aaeb952e409b5c544e9257a",
+        url:"http://v.juhe.cn/expressonline/getCarriers.php?dtype=&ex_category=&key=e215be13cf65992c602ecddeeba1bd62",
 
         dataType:"jsonp",
 
         success: function(responce){
-          var data=responce.result.today;
-          var info=[];
-          info.push("<h2>"+university.name()+"</h2>");
-          info.push("<p>温度："+data.temperature+"</p>");
-          info.push("<p>天气："+data.weather+"</p>");
+          var data=responce.result;
+          
           
           
           AMap.event.addListener(university.marker,'click',function(){
+            var info=[];
+            info.push("<h2>"+university.name()+"</h2>");
+            // info.push("<p><a href='"+data[1].url+"'>"+data[1].title+"</a></p>");
+            // info.push("<p>作者："+data[1].author_name+"</p>");
 
+            info.push("<p>快递名称："+data[i].carrier_name+"</p>");
+            info.push("<p>快递电话："+data[i].carrier_phone+"</p>");
             var src="http://api.map.baidu.com/panorama/v2?ak=I8yKhCGTcuIEU9fBlwppGcXUA9klckhF&width=256&height=128&coordtype=wgs84ll&location="+university.location()+"&fov=180";
             
             
